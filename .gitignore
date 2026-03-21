@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+__pycache__/
+.pytest_cache/
+allure-results/
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
