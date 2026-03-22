@@ -22,10 +22,11 @@ def run_producer(topic_name = 'test-topic', sleep = 3):
 
     try:
         while True:
+            user_number = randrange(100)
             data = {'id': msg_number,
-                    'user': f'user_{randrange(100)}',
+                    'user': f'user_{user_number:0>2}',
                     'action': f'test message #{msg_number}'}
-            user_key = data['user']
+            user_key = f'hash-{user_number * 2}'
 
             # Асинхронная отправка (попадает в локальную очередь)
             producer.produce(
