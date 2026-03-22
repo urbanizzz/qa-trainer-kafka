@@ -18,7 +18,7 @@ def run_consumer(
 
     try:
         print(f'[Consumer #{consumer_id}] The consumer is launched and '
-              f'subscribed to "test-topic". Waiting...', flush=True)
+              f'subscribed to {topic_name}. Waiting...', flush=True)
 
         while True:
             msg = consumer.poll(1.0) # Ждем сообщение 1 секунду
