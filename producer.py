@@ -1,9 +1,10 @@
 from confluent_kafka import Producer
 import json
 import time
+from random import randrange
 
 
-def run_producer():
+def run_producer(topic_name = 'test-topic', sleep = 3):
     conf = {'bootstrap.servers': "localhost:9092"}
     producer = Producer(conf)
 
@@ -21,18 +22,22 @@ def run_producer():
 
     try:
         while True:
-            data = {'id': msg_number, 'user': 'urban', 'action': f'test {msg_number}'}
+            data = {'id': msg_number,
+                    'user': f'user_{randrange(100)}',
+                    'action': f'test message #{msg_number}'}
+            user_key = data['user']
 
             # Асинхронная отправка (попадает в локальную очередь)
             producer.produce(
-                'test-topic',
-                json.dumps(data).encode('utf-8'),
+                topic=topic_name,
+                key = user_key,
+                value = json.dumps(data).encode('utf-8'),
                 callback=delivery_report
             )
 
             # Опрашиваем события, чтобы сработал callback
             producer.poll(0)
-            time.sleep(1)
+            time.sleep(sleep)
             msg_number += 1
 
     finally:
