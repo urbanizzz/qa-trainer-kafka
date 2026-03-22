@@ -7,10 +7,10 @@ from consumer import run_consumer
 from confluent_kafka.admin import AdminClient, NewTopic
 
 
-TOPIC_NAME = 'my-test-topic'
-GROUP_ID = 'my-test-group'
-NUM_CONSUMERS = 3
-MSG_PAUSE = 3 # Пауза между сообщениями в продюсере
+TOPIC_NAME = 'my-test-topic'    # имя топика
+GROUP_ID = 'my-test-group'      # имя группы
+NUM_CONSUMERS = 3               # количество консюмеров и партиций
+MSG_PAUSE = 3                   # Пауза между сообщениями в продюсере
 
 def create_topic_if_not_exists(topic_name, num_partitions = 1):
     admin_client = AdminClient({'bootstrap.servers': 'localhost:9092'})
