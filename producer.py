@@ -27,12 +27,15 @@ def run_producer(topic_name = 'test-topic', sleep = 3):
                     'user': f'user_{user_number:0>2}',
                     'action': f'test message #{msg_number}'}
             user_key = f'hash-{user_number * 2}'
+            headers = {'traceId': f'{user_number}-{msg_number}',
+                       'contentType': 'application/json'}
 
             # Асинхронная отправка (попадает в локальную очередь)
             producer.produce(
                 topic=topic_name,
                 key = user_key,
                 value = json.dumps(data).encode('utf-8'),
+                headers = headers,
                 callback=delivery_report
             )
 
