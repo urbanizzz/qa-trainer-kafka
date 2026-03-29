@@ -1,33 +1,41 @@
 services:
-  kafka:
-    image: apache/kafka:latest
+  kafka-learning:
+    image: apache/kafka:4.2.0
     container_name: kafka-learning
-    # Пробрасываем порты напрямую в Windows
     ports:
-      - "9092:9092"
+      - "9092:9092" # Внешний порт для приложений Windows
     environment:
+      # Параметры узла (KRaft)
       KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      # Указываем реальный IP твоего компьютера в локальной сети или 127.0.0.1
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+
+      # Слушатели на портах 9092, 9093, 9094
+      # 9092: Внешний (для Windows / localhost)
+      # 9094: Внутренний (для Kafka UI)
+      # 9093: Контроллер (внутренний трафик KRaft)
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka-learning:9094,EXTERNAL://localhost:9092'
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+
+      # Кластерный ID (обязателен для новых образов Apache)
+      KAFKA_CLUSTER_ID: '4L6G9Q3aT-m79qfUv_ZJbw'
+
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:latest
+    image: provectuslabs/kafka-ui:v0.7.2
     container_name: kafka-ui
     ports:
       - "8080:8080"
+    depends_on:
+      - kafka-learning
     environment:
-      - KAFKA_CLUSTERS_0_NAME=local-cluster
-      # Соединяемся через шлюз Docker к Windows-порту 9092
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=host.docker.internal:9092
-      - DYNAMIC_CONFIG_ENABLED=true
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      KAFKA_CLUSTERS_0_NAME: local-cluster
+      # Подключаемся к брокеру через внутренний порт 9094 по имени контейнера
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-learning:9094
+      DYNAMIC_CONFIG_ENABLED: 'true'
