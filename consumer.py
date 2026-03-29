@@ -1,6 +1,10 @@
 from confluent_kafka import Consumer, KafkaError
 import json
 
+def load_proc(num = 100000):
+    s = []
+    for i in range(num):
+        s.append(num//2)
 
 def run_consumer(
         consumer_id = 0,
@@ -40,6 +44,7 @@ def run_consumer(
 
             # Десериализация и вывод
             data = json.loads(msg.value().decode('utf-8'))
+            load_proc(10**6)
             print(f'[Consumer #{consumer_id}] Message: {data} | Partition:'
                   f' {msg.partition()} | Offset: {msg.offset()}', flush=True)
 
